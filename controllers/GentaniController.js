@@ -126,9 +126,8 @@ export const createGentaniByUpload = async (req, res) => {
 
             // Skip rows with missing or invalid fields
             if (!material_no || !plant || !quantity) {
-                // errors.push({ record, message: "Missing required fields!" });
-                // continue;1
-                return res.status(400).json({ message: `Invalid file! Missing required column : material_no, plant, or quantity!`})
+                errors.push({ record, message: "Missing required fields: material_no, plant, or quantity!" });
+                continue;
             }
 
             try {
