@@ -11,7 +11,8 @@ export const getSupplyQtyAll = async(req, res) => {
               material_desc: material.material_desc,
               material_no: material.material_no,
               plant: material.plant,
-              uom: material.uom
+              uom: material.uom,
+              pack: material.pack
             },
             {
               where: { 
@@ -40,7 +41,7 @@ export const getSupplyQtyAll = async(req, res) => {
 export const updateSupplyQty = async(req, res) => {
     try {
       const materialNo = req.params.materialNo
-      const { qty, updated_by } = req.body
+      const { qty, updated_by, plant } = req.body
   
       if(!materialNo){
         return res.status(404).json({ message: "Please provide material no!"})
@@ -52,28 +53,30 @@ export const updateSupplyQty = async(req, res) => {
 
       const supplyFound = await SupplyQty.findOne({
         where: {
-            material_no: materialNo
+            material_no: materialNo,
+            plant: plant
         }
       })
 
       if(!supplyFound){
-        return res.status(404).json({ message: `Supply for Material No. ${materialNo} not found!`})
+        return res.status(404).json({ message: `Supply for Material No. ${materialNo} in ${plant} not found!`})
       }
 
       if(qty === supplyFound.qty){
         return res.status(400).json({ message: "Can't update qty with the same value!"})
       }
   
-      const response = await SupplyQty.update({
+      await SupplyQty.update({
         qty: qty,
         updated_by: updated_by
       }, {
         where: {
-          material_no: materialNo
+          material_no: materialNo,
+          plant: plant
         }
       })
   
-      res.status(201).json({ message: `Supply Qty for Material ${materialNo} updated`})
+      res.status(201).json({ message: `Supply Qty for Material ${materialNo} in ${plant} updated`})
       
     } catch (error) {
       res.status(500).json({ message: "Internal server error", error: error.message})

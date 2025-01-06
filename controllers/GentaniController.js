@@ -54,12 +54,12 @@ export const getGentaniById = async (req, res) => {
 
 export const createGentani = async (req, res) => {
     try {
-        let { katashiki, material_no, plant, quantity, created_by, updated_by } = req.body;
+        let { katashiki, material_no, plant, quantity_fortuner, quantity_zenix, quantity_innova, quantity_avanza, quantity_yaris, quantity_calya, created_by, updated_by } = req.body;
         // katashiki = katashiki?.trim()
         material_no = material_no?.trim();
 
         // Validate input
-        if (!material_no || plant === "Select" || !quantity ){
+        if (!material_no || plant === "Select" ){
             return res.status(400).json({ message: "Please fill out all required fields!" });
         }
 
@@ -94,7 +94,12 @@ export const createGentani = async (req, res) => {
             material_desc: material.material_desc,
             plant: material.plant,
             uom: material.uom,
-            quantity: quantity,
+            quantity_fortuner: quantity_fortuner,
+            quantity_zenix: quantity_zenix,
+            quantity_innova: quantity_innova,
+            quantity_avanza: quantity_avanza,
+            quantity_yaris: quantity_yaris,
+            quantity_calya: quantity_calya,
             material_id: material.material_id,
             created_by: created_by,
             updated_by: updated_by
@@ -122,13 +127,13 @@ export const createGentaniByUpload = async (req, res) => {
 
         // Process each row in the uploaded data
         for (const record of data) {
-            const { material_no, plant, quantity } = record;
+            const { material_no, plant, quantity_fortuner, quantity_zenix, quantity_innova, quantity_avanza, quantity_yaris, quantity_calya } = record;
 
             // Skip rows with missing or invalid fields
-            if (!material_no || !plant || !quantity) {
-                errors.push({ record, message: "Missing required fields: material_no, plant, or quantity!" });
+            if (!material_no || !plant) {
+                errors.push({ record, message: "Material_no or plant can't be empty!" });
                 continue;
-            }
+            } 
 
             try {
                 // Check if the material exists
@@ -160,8 +165,13 @@ export const createGentaniByUpload = async (req, res) => {
                     material_desc: material.material_desc,
                     plant: material.plant,
                     uom: material.uom,
-                    quantity,
+                    quantity_fortuner: quantity_fortuner,
+                    quantity_zenix: quantity_zenix,
+                    quantity_innova: quantity_innova,
                     material_id: material.material_id,
+                    quantity_avanza: quantity_avanza,
+                    quantity_yaris: quantity_yaris,
+                    quantity_calya: quantity_calya,
                     created_by,
                     updated_by: "",
                 });
@@ -191,11 +201,10 @@ export const updateGentani = async(req, res) => {
         if(!gentani_id){
             return res.status(404).json({ message: "Please provide gentani Id!"})
         }
-        const { quantity, updated_by } = req.body;
+        const { quantity_fortuner, quantity_zenix, quantity_innova, quantity_avanza, quantity_yaris, quantity_calya, updated_by } = req.body;
         
-        // Validate input
-        if (!quantity || !updated_by) {
-            return res.status(400).json({ message: "Please fill out all required fields!" });
+        if( !updated_by ){
+            return res.status(401).json({ message: "Unauthorized!"})
         }
 
         // Check if Material exists
@@ -209,12 +218,23 @@ export const updateGentani = async(req, res) => {
             return res.status(404).json({ message: "Gentani not found!"})
         }
         
-        if(gentani.quantity === quantity){
-            return res.status(400).json({ message: "Gentani quantity can't be update with same value"})
+        if(gentani.quantity_fortuner === quantity_fortuner && 
+            gentani.quantity_zenix === quantity_zenix && 
+            gentani.quantity_innova === quantity_innova &&
+            gentani.quantity_avanza === quantity_avanza && 
+            gentani.quantity_yaris === quantity_yaris &&
+            gentani.quantity_calya === quantity_calya
+        ){
+            return res.status(400).json({ message: "Quantity can't be update with same value!"})
         }
 
         await Gentani.update({
-            quantity,
+            quantity_fortuner,
+            quantity_zenix,
+            quantity_innova,
+            quantity_avanza,
+            quantity_yaris,
+            quantity_calya,
             updated_by,
         },
             {
@@ -240,7 +260,7 @@ export const deleteGentani = async(req, res) => {
             return res.status(400).json({ message: "Please provide gentani id!" });
         }
 
-        const gentaniFound = Gentani.findOne({
+        const gentaniFound = await Gentani.findOne({
             where: {
                 gentani_id: gentani_id
             }
@@ -254,59 +274,10 @@ export const deleteGentani = async(req, res) => {
                 gentani_id: gentani_id
             }
         })
-        res.status(200).json({ message: `Material deleted`})
+        res.status(200).json({ message: `Gentani for Material No. ${gentaniFound.material_no} in ${gentaniFound.plant} deleted`})
 
     } catch (error) {
         console.log("Error :", error.message)
         res.status(500).json({ message: "Internal server error!", error: error.message})
     }
 }
-
-// export const setGentaniMaterial = async(req, res) => {
-//     try {
-//         const {gentaniId} = req.params
-//         const materialNo = req.body.material_no
-//         if(!gentaniId){
-//             res.status(400).json({ message: "Please provide gentani Id!"})
-//             return
-//         }
-//         if(!materialNo){
-//             res.status(400).json({ message: "Please provide material no!"})
-//             return
-//         }
-
-//         const gentani = await Gentani.findOne({
-//             where: {
-//                 gentani_id: gentaniId
-//             }
-//         })
-
-//         const material = await Material.findOne({
-//             where: {
-//                 material_no: materialNo
-//             }
-//         })
-
-//         if(!gentani){
-//             res.status(404).json({ message: `Gentani with id ${gentaniId} not found!`})
-//             return
-//         }
-
-//         if(!material){
-//             res.status(404).json({ message: `Material No. ${materialNo} not found`})
-//             return
-//         }
-
-//          // Update the Material record with gentani_id
-//         await Material.update(
-//             { gentani_id: gentaniId },
-//             { where: { material_no: materialNo } }
-//         );
-
-//         res.status(200).json({ message: `Gentani Id ${gentaniId} succesfully updated to Material No. ${materialNo}`})
-        
-//     } catch (error) {
-//         console.log("Error :", error.message)
-//         res.status(500).json({ message: "Internal server error!", error: error.message})
-//     }
-// }

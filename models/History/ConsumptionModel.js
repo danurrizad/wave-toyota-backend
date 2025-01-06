@@ -14,6 +14,10 @@ const Consumption = db.define(
             type: DataTypes.STRING(50),
             allowNull: false
         },
+        plant: {
+            type: DataTypes.STRING(30),
+            allowNull: true
+        },
         consumption_date: {
             type: DataTypes.DATE,
             allowNull: false
@@ -22,6 +26,10 @@ const Consumption = db.define(
             type: DataTypes.DATE,
             allowNull: false
         }, 
+        unit: {
+            type: DataTypes.STRING(50),
+            allowNull: false
+        },
         katashiki: {
             type: DataTypes.STRING(50),
             allowNull: false
@@ -35,15 +43,15 @@ const Consumption = db.define(
             allowNull: false
         },
         initial_stock: {
-            type: DataTypes.DECIMAL,
+            type: DataTypes.DECIMAL(10, 2),
             allowNull: false
         },
         final_stock: {
-            type: DataTypes.DECIMAL,
+            type: DataTypes.DECIMAL(10, 2),
             allowNull: false
         },
         qty: {
-            type: DataTypes.DECIMAL,
+            type: DataTypes.DECIMAL(10, 2),
             allowNull: false
         }
     },

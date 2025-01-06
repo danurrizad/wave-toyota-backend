@@ -34,7 +34,7 @@ const Material = db.define(
         },
         depth_material: {
             type: DataTypes.DECIMAL,
-            allowNull: false,
+            allowNull: true,
         },
         supply_line: {
             type: DataTypes.STRING(50),
@@ -43,6 +43,10 @@ const Material = db.define(
         uom: {
             type: DataTypes.STRING(20),
             allowNull: false,
+        },
+        pack: {
+            type: DataTypes.STRING(20),
+            allowNull: true,
         },
         // gentani_id: {
         //     type: DataTypes.INTEGER,

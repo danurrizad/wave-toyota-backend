@@ -35,40 +35,40 @@ export const getMonitoringAll = async(req, res) => {
 
 export const updateMonitoring = async(req, res) => {
     try {
-        const material_no = req.params.materialNo   
-        if(!material_no){
-            return res.status(404).json({ message: "Please provide material no!"})
+        const material_no = req.params.materialNo
+        const {visualization_name, plant, updated_by} = req.body
+
+        if(!material_no || !plant){
+            return res.status(404).json({ message: "Please provide material no and plant!"})
         }
-        const {visualization_name, updated_by} = req.body
         if(!visualization_name){
             return res.status(404).json({ message: "Please fill out all forms!"})
         }
 
         const monitoringFound = await Monitoring.findOne({
             where: {
-                material_no: material_no
+                material_no: material_no,
+                plant: plant
             }
         })
         if(!monitoringFound){
-            return res.status(404).json({ message: `Monitoring data for Material No. ${material_no} not found!`})
+            return res.status(404).json({ message: `Monitoring data for Material No. ${material_no} in ${plant} not found!`})
         }
-
-        console.log("VISUALIZATION NAME EARLIER : ", monitoringFound.visualization_name)
-        console.log("VISUALIZATION NAME TO UPDATE : ", visualization_name)
 
         if(visualization_name === monitoringFound.visualization_name){
             return res.status(400).json({ message: "Can't update visualization name with the same value!"})
         }
 
-        const response = await Monitoring.update({
+        await Monitoring.update({
             visualization_name: visualization_name,
             updated_by: updated_by
         }, {
             where: {
-                material_no: material_no
+                material_no: material_no,
+                plant: plant
             }
         })
-        res.status(201).json({ message: `Monitoring data for Material No. ${material_no} updated`})
+        res.status(201).json({ message: `Monitoring data for Material No. ${material_no} in ${plant} updated`})
 
     } catch (error) {
         res.status(500).json({ message: "Internal server error!", error: error.message})

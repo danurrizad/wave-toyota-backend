@@ -24,8 +24,20 @@ const SupplyHistory = db.define(
             type: DataTypes.STRING(50),
             allowNull: false
         },
+        plant: {
+            type: DataTypes.STRING(30),
+            allowNull: false
+        },
         supply_by: {
             type: DataTypes.STRING(20),
+            allowNull: false
+        },
+        qty_pack: {
+            type: DataTypes.DECIMAL,
+            allowNull: false
+        },
+        qty_uom: {
+            type: DataTypes.DECIMAL,
             allowNull: false
         },
         supply_date: {

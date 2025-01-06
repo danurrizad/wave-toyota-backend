@@ -13,15 +13,16 @@ export const getSupplyHistoryAll = async(req, res) => {
 
 export const createSupplyHistory = async(req, res) => {
     try {
-        const { material_no, material_desc, plant, uom, qty, supply_by } = req.body
+        const { material_no, material_desc, plant, uom, qty_pack, qty_uom, supply_by } = req.body
         // console.log("form body :", req.body)
-        if(!material_no || !material_desc || !plant || !uom || !qty || !supply_by){
+        if(!material_no || !material_desc || !plant || !uom || !qty_pack || !qty_uom || !supply_by){
             return res.status(400).json({ message: "Please fill out the form!", error: error.message})
         }
 
         const material = await Material.findOne({
             where: {
-                material_no: material_no
+                material_no: material_no,
+                plant: plant
             }
         })
 
@@ -31,7 +32,8 @@ export const createSupplyHistory = async(req, res) => {
 
         const setup = await Setup.findOne({
             where: {
-                material_no: material_no   
+                material_no: material_no,
+                plant: plant   
             }
         })
 
@@ -40,14 +42,15 @@ export const createSupplyHistory = async(req, res) => {
         }
 
         const currentSupply = setup.dataValues.total
-        const afterSupply = Math.round((currentSupply + qty) * 100 ) / 100
+        const afterSupply = Math.round((currentSupply + qty_uom) * 100 ) / 100
 
         const setupUpdate = await Setup.update(
             {
                 total: afterSupply
             },{
                 where: {
-                    material_no: material_no
+                    material_no: material_no,
+                    plant: plant
                 }
             }
         )
@@ -59,7 +62,10 @@ export const createSupplyHistory = async(req, res) => {
         const supplyHistory = await SupplyHistory.create({
             material_no: material_no,
             material_desc: material_desc,
+            plant: plant,
             supply_by: supply_by,
+            qty_pack: qty_pack,
+            qty_uom: qty_uom,
             supply_date: new Date().toISOString().split('T')[0], // 'YYYY-MM-DD' for DATEONLY
             supply_time: new Date().toTimeString().split(' ')[0]  // 'HH:MM:SS' for TIME
         })

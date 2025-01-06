@@ -16,8 +16,9 @@ import MonitoringRouter from './routes/MonitoringRouter.js'
 import ConsumptionRouter from './routes/History/ConsumptionRouter.js'
 import SupplyHistoryRouter from './routes/History/SupplyHistoryRouter.js'
 
+import RatioProdRouter from './routes/RatioProdRouter.js';
 import SchedulledConsumption from './controllers/History/SchedulledConsumption.js';
-
+import SchedulledConsumption2 from './controllers/History/SchedulledConsumption2.js';
 
 
 dotenv.config();
@@ -57,6 +58,7 @@ app.use(express.json())
 
 // function for consumption using assumption in Gentani
 SchedulledConsumption()
+SchedulledConsumption2()
 
 app.use("/api", AuthRouter);
 app.use("/api", UserRouter);
@@ -68,6 +70,7 @@ app.use("/api", SupplyQtyRouter)
 app.use("/api", MonitoringRouter)
 app.use("/api", ConsumptionRouter)
 app.use("/api", SupplyHistoryRouter)
+app.use("/api", RatioProdRouter)
 
 app.get('/', (req, res) => {
   res.send('Successful response.');

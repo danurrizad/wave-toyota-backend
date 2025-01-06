@@ -42,7 +42,7 @@ export const getSetupById = async(req, res) => {
 export const updateSetup = async(req, res) => {
   try {
     const materialNo = req.params.materialNo
-    const { standard_supply, critical_stock, total, updated_by } = req.body
+    const { standard_supply, critical_stock, total, updated_by, plant } = req.body
 
     if(!materialNo){
       return res.status(404).json({ message: "Please provide material no!"})
@@ -56,14 +56,15 @@ export const updateSetup = async(req, res) => {
       return res.status(400).json({ message: "Standard supply, critical stock, or total can't be less than 0!"})
     }
 
-    const response = await Setup.update({
+    await Setup.update({
       standard_supply: standard_supply,
       critical_stock: critical_stock,
       total: total,
       updated_by: updated_by
     }, {
       where: {
-        material_no: materialNo
+        material_no: materialNo,
+        plant: plant
       }
     })
 

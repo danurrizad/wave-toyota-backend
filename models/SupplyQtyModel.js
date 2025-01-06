@@ -32,6 +32,10 @@ const SupplyQty = db.define(
             type: DataTypes.STRING(20),
             allowNull: false,
         },
+        pack: {
+            type: DataTypes.STRING(20),
+            allowNull: true,
+        },
         created_by: {
             type: DataTypes.STRING(20),
             allowNull: false,
