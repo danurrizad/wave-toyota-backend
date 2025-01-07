@@ -63,31 +63,31 @@ const Gentani = db.define(
       allowNull: false,
     },
     quantity_fortuner: {
-      type: DataTypes.DECIMAL(10, 2),
+      type: DataTypes.DECIMAL(10, 4),
       allowNull: true,
     },
     quantity_zenix: {
-      type: DataTypes.DECIMAL(10, 2),
+      type: DataTypes.DECIMAL(10, 4),
       allowNull: true,
     },
     quantity_innova: {
-      type: DataTypes.DECIMAL(10, 2),
+      type: DataTypes.DECIMAL(10, 4),
       allowNull: true,
     },
     quantity_avanza: {
-      type: DataTypes.DECIMAL(10, 2),
+      type: DataTypes.DECIMAL(10, 4),
       allowNull: true,
     },
     quantity_yaris: {
-      type: DataTypes.DECIMAL(10, 2),
+      type: DataTypes.DECIMAL(10, 4),
       allowNull: true,
     },
     quantity_calya: {
-      type: DataTypes.DECIMAL(10, 2),
+      type: DataTypes.DECIMAL(10, 4),
       allowNull: true,
     },
     material_id: {
-      type: DataTypes.INTEGER(10, 2),
+      type: DataTypes.INTEGER,
       allowNull: true,
       references: {
         model: Material,

@@ -43,15 +43,15 @@ const Consumption = db.define(
             allowNull: false
         },
         initial_stock: {
-            type: DataTypes.DECIMAL(10, 2),
+            type: DataTypes.DECIMAL(10, 4),
             allowNull: false
         },
         final_stock: {
-            type: DataTypes.DECIMAL(10, 2),
+            type: DataTypes.DECIMAL(10, 4),
             allowNull: false
         },
         qty: {
-            type: DataTypes.DECIMAL(10, 2),
+            type: DataTypes.DECIMAL(10, 4),
             allowNull: false
         }
     },
