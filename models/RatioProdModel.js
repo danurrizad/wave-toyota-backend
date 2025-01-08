@@ -12,6 +12,10 @@ const RatioProd = db.define(
             autoIncrement: true,
             primaryKey: true,
           },
+        id_production: {
+            type: DataTypes.INTEGER,
+            allowNull: false
+        },
         fortuner: {
             type: DataTypes.DECIMAL(10, 2),
             allowNull: false
@@ -36,10 +40,25 @@ const RatioProd = db.define(
             type: DataTypes.DECIMAL(10, 2),
             allowNull: false
         },
+        tact_time_1: {
+            type: DataTypes.DECIMAL(10, 2),
+            allowNull: true
+        },
+        tact_time_2: {
+            type: DataTypes.DECIMAL(10, 2),
+            allowNull: true,
+        },
+        efficiency_1: {
+            type: DataTypes.DECIMAL(10, 2),
+            allowNull: true,
+        },
+        efficiency_2: {
+            type: DataTypes.DECIMAL(10, 2),
+            allowNull: true,
+        }
     },
     {
         freezeTableName: true,
-        timestamps: true,
     }
 );
 

@@ -39,17 +39,49 @@ const SchedulledConsumption2 = async () => {
     };
 
     const getRatios = async () => {
-        const ratioProd = await RatioProd.findOne({ where: { ratio_id: 1 } });
+        const ratioProd = await RatioProd.findOne({ where: { id_production: 1 } });
+        // const ratioProd = await RatioProd.findAll();
+        // if(!ratioProd || ratioProd === null){
+        //     const initialRatio = await RatioProd.create({
+        //         id_production: 1,
+        //         fortuner: 0,
+        //         zenix: 0,
+        //         innova: 0,
+        //         tact_time_1: 0,
+        //         efficiency_1: 0,
+        //         avanza: 0,
+        //         yaris: 0,
+        //         calya: 0,
+        //         tact_time_2: 0,
+        //         efficiency_2: 0
+        //     })
+        //     return{
+        //         avanza: initialRatio.avanza,
+        //         yaris: initialRatio.yaris,
+        //         calya: initialRatio.calya,
+        //         tact_time_2: initialRatio.tact_time_2,
+        //         efficiency_2: initialRatio.efficiency_2
+        //     }
+        // }
         return {
             avanza: ratioProd.avanza,
             yaris: ratioProd.yaris,
             calya: ratioProd.calya,
+            tact_time_2: ratioProd.tact_time_2,
+            efficiency_2: ratioProd.efficiency_2
         };
     };
 
     const getNextUnit = (() => {
         let unitQueue = [];
         return (totalUnits, ratios) => {
+            // Check if all ratios are 0
+            const totalRatios = ratios.avanza + ratios.yaris + ratios.calya;
+            if (totalRatios === 0) {
+                console.warn("All ratio values are 0. No units can be allocated.");
+                return null; // Or handle it in a way that fits your use case
+            }
+    
             if (unitQueue.length === 0) {
                 const avanzaUnits = Math.floor(totalUnits * (ratios.avanza / 100));
                 const yarisUnits = Math.floor(totalUnits * (ratios.yaris / 100));
@@ -67,8 +99,11 @@ const SchedulledConsumption2 = async () => {
 
     const createConsumptionCalculation = async () => {
         try {
+            // Calculate Total Units Per Day
+            const totalMinutes = 455
             const ratios = await getRatios();
-            const totalUnitsPerDay = 230; // Example: total units made in a day
+            const totalUnitsPerDay = Math.round(totalMinutes / (ratios.tact_time_2 / 60) * (ratios.efficiency_2 / 100))
+
             const time = moment().tz("Asia/Jakarta");
             const unit = getNextUnit(totalUnitsPerDay, ratios); // Get the next unit
 
@@ -133,16 +168,66 @@ const SchedulledConsumption2 = async () => {
         }
     };
 
-    cron.schedule("*/2 * * * *", async () => {
-        try {
-            if (isWithinRange()) {
-                await createConsumptionCalculation();
-            }
-        } catch (error) {
-            console.error("Error in scheduled job execution:", error);
-        }
-    });
+    let tactTime = 0; // Initial value
+    let intervalId = null; // To store the interval ID
 
+    const updateTactTime = async () => {
+        const ratios = await getRatios();
+        return ratios.tact_time_2; // Return updated tactTime dynamically
+    };
+
+    const startScheduler = async () => {
+        // Fetch initial tactTime
+        tactTime = await updateTactTime();
+
+        // If tactTime is invalid (0 or less), do not start the interval
+        if (tactTime <= 0) {
+            console.log("tactTime is 0 or invalid. Scheduler will not start.");
+            return;
+        }
+
+        // Clear any existing interval to prevent duplicates
+        if (intervalId) {
+            clearInterval(intervalId);
+        }
+
+        // Start the interval
+        intervalId = setInterval(async () => {
+            try {
+                // Check if tactTime is still valid before running
+                if (tactTime > 0 && isWithinRange()) {
+                    await createConsumptionCalculation();
+                    console.log("Consumption calculation executed with tactTime:", tactTime);
+                }
+            } catch (error) {
+                console.error("Error in scheduled job execution:", error);
+            }
+        }, tactTime * 1000); // Run every tactTime seconds
+    };
+
+    const monitorTactTimeChanges = () => {
+        // Check periodically for changes in tactTime
+        setInterval(async () => {
+            const newTactTime = await updateTactTime();
+            if (newTactTime !== tactTime) {
+                tactTime = newTactTime; // Update the global tactTime value
+                console.log("tactTime updated to:", tactTime);
+
+                // Restart the scheduler with the new tactTime
+                startScheduler();
+            }
+        }, 5000); // Check for changes every 5 seconds (adjust as needed)
+    };
+
+
+
+
+    // Start monitoring and scheduling
+    (async () => {
+        await startScheduler();
+        monitorTactTimeChanges();
+    })();
+    
     console.log("Scheduled jobs initialized.");
 };
 
