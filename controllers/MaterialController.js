@@ -3,6 +3,7 @@ import Material from "../models/MaterialModel.js"
 import Monitoring from "../models/MonitoringModel.js";
 import Setup from "../models/SetupModel.js"
 import SupplyQty from "../models/SupplyQtyModel.js";
+import { Sequelize } from "sequelize";
 
 import db from "../utils/Database.js";
 
@@ -53,23 +54,27 @@ export const createMaterial = async (req, res) => {
         pack = pack?.trim();
 
         // Input Validation
-        if (!material_no || !material_desc || !plant || !depth_material || !andon_display || !supply_line || !uom || !pack) {
+        if (!material_no || !material_desc || !plant || !andon_display || !supply_line || !uom || !pack) {
+            transaction.rollback()
             return res.status(400).json({ message: "Please fill out all required fields" });
         }
 
         // Convert and validate depth_material
         depth_material = parseFloat(depth_material); // Convert to number
         if (isNaN(depth_material)) {
+            transaction.rollback()
             return res.status(400).json({ message: "Invalid depth material. Must be a valid number!" });
         }
 
         if (!created_by) {
+            transaction.rollback()
             return res.status(401).json({ message: "Unauthorized: Created by is required" });
         }
 
         // Check if material already exists
         const materialExists = await Material.findOne({ where: { material_no, plant }, transaction });
         if (materialExists) {
+            transaction.rollback()
             return res.status(400).json({ message: `Material No. ${material_no} already exists in plant ${plant}` });
         }
 
@@ -90,6 +95,11 @@ export const createMaterial = async (req, res) => {
             { transaction }
         );
 
+        if(!newMaterial){
+            transaction.rollback()
+            return res.status(400).json({ message: "Error creating material!"})
+        }
+
         // Step 2: Create Setup
         const newSetup = await Setup.create(
             {
@@ -106,6 +116,11 @@ export const createMaterial = async (req, res) => {
             { transaction }
         );
 
+        if(!newSetup){
+            transaction.rollback()
+            return res.status(400).json({ message: "Error creating initial setup!"})
+        }
+
         // Step 3: Create SupplyQty
         const newSupplyQty = await SupplyQty.create(
             {
@@ -121,6 +136,11 @@ export const createMaterial = async (req, res) => {
             { transaction }
         );
 
+        if(!newSupplyQty){
+            transaction.rollback()
+            return res.status(400).json({ message: "Error creating initial supply quantity!"})
+        }
+
         // Step 4: Create Monitoring
         const newMonitoring = await Monitoring.create(
             {
@@ -133,6 +153,11 @@ export const createMaterial = async (req, res) => {
             },
             { transaction }
         );
+
+        if(!newMonitoring){
+            transaction.rollback()
+            return res.status(400).json({ message: "Error creating initial monitoring!"})
+        }
 
         // Step 5: Update Material with Foreign Keys
         await Material.update(
@@ -158,10 +183,10 @@ export const createMaterial = async (req, res) => {
         });
     } catch (error) {
         // Rollback the transaction on error
+        // await transaction.rollback();
         await transaction.rollback();
-        console.error("Error in createMaterial:", error.message);
-        res.status(500).json({ message: "Internal server error", error: error.message });
-    }
+        return res.status(500).json({ message: "Internal server error", error: error.message });
+    } 
 };
 
 export const updateMaterial = async(req, res) => {

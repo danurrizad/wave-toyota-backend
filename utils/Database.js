@@ -8,7 +8,6 @@ dotenv.config({ path: "./.env" });
 const db = new Sequelize(process.env.DB_DATABASE, process.env.DB_USER, process.env.DB_PASSWORD, {
   host: process.env.DB_SERVER,
   dialect: process.env.DIALECT,
-//   logging: false,
   timezone: "+07:00",
     // port: 1433,
   dialectOptions: {
@@ -19,10 +18,16 @@ const db = new Sequelize(process.env.DB_DATABASE, process.env.DB_USER, process.e
     //   instanceName: "SQLEXPRESS"
     },
   },
+  pool: {
+    max: 10, // Increase maximum number of connections in the pool
+    min: 2, // Set a minimum number of connections to keep in the pool
+    acquire: 10000, // Increase the time Sequelize will wait for a connection to be established
+    idle: 15000, // Increase idle time before releasing a connection
+  },
 });
 
-// db.sync({ alter: true }).then(() => console.log("Database synchronized"));
-db.sync({ alter: false }).then(() => console.log("Database synchronized without altering table..."));
+db.sync({ alter: true }).then(() => console.log("Database synchronized"));
+// db.sync({ alter: false }).then(() => console.log("Database synchronized without altering table..."));
 
 
 export default db;

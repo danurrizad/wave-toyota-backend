@@ -1,11 +1,13 @@
 import bcrypt from "bcrypt";
 import User from "../models/UserModel.js";
+import Role from "../models/RoleModel.js";
 
 export const registerUser = async (req, res) => {
-  const { username, password, email } = req.body;
+  const { username, password, email, role_name } = req.body;
+  console.log("Body :", req.body)
 
   try {
-    if(!username || !password || !email){
+    if(!username || !password || !email ||!role_name){
       return res.status(404).json({ message: "Please fill out all of the forms!"})
     }
     // Check if username or email already exists
@@ -29,6 +31,11 @@ export const registerUser = async (req, res) => {
       return res.status(400).json({ message: "Password should be at least 6 character long"})
     }
 
+    const role = await Role.findOne({ where: { role_name: role_name}})
+    if(!role){
+      return res.status(400).json({ message: "Failed to register! Role incorrect"})
+    }
+
     // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -37,6 +44,8 @@ export const registerUser = async (req, res) => {
       username,
       password: hashedPassword,
       email,
+      roleId: role.id,
+      role_name: "-"
     });
 
     // Optional: Automatically log in the user after registration
@@ -46,6 +55,7 @@ export const registerUser = async (req, res) => {
         id: newUser.id,
         username: newUser.username,
         email: newUser.email,
+        roleId: newUser.roleId
       },
     });
   } catch (error) {

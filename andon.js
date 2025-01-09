@@ -7,6 +7,7 @@ import path from "path";
 
 import AuthRouter from './routes/AuthRouter.js';
 import UserRouter from './routes/UserRouter.js';
+import RoleRouter from './routes/RoleRouter.js';
 
 import MaterialRouter from './routes/MaterialRouter.js';
 import GentaniRouter from './routes/GentaniRouter.js'
@@ -71,6 +72,7 @@ app.use("/api", MonitoringRouter)
 app.use("/api", ConsumptionRouter)
 app.use("/api", SupplyHistoryRouter)
 app.use("/api", RatioProdRouter)
+app.use("/api", RoleRouter)
 
 app.get('/', (req, res) => {
   res.send('Successful response.');
