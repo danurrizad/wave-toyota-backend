@@ -75,15 +75,52 @@ const SchedulledConsumption = async () => {
 
     const getNextUnit = (() => {
         let unitQueue = [];
+        let startCalculation = 0;
+
+        // Function to reset the unitQueue at midnight
+        const resetUnitQueueDaily = () => {
+            const now = new Date();
+            const nextMidnight = new Date();
+            nextMidnight.setHours(24, 0, 0, 0); // Set to the next midnight
+
+            const timeUntilMidnight = nextMidnight - now;
+
+            // Set a timeout to clear the unitQueue at the next midnight
+            setTimeout(() => {
+                unitQueue.length = 0; // Reset the queue
+                console.log("unitQueue has been reset for the new day!");
+                resetUnitQueueDaily(); // Schedule the next reset
+            }, timeUntilMidnight);
+        };
+
+        // Initialize the daily reset function
+        resetUnitQueueDaily();
+
+        // Function to shuffle an array
+        const shuffleArray = (array) => {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]]; // Swap elements
+            }
+            return array;
+        };
+        
         return (totalUnits, ratios) => {
+            // console.warn("total units :", totalUnits)
+            // console.warn("startCalculation :", startCalculation)
             // Check if all ratios are 0
             const totalRatios = ratios.fortuner + ratios.zenix + ratios.innova;
             if (totalRatios === 0) {
                 console.warn("All ratio values are 0. No units can be allocated.");
                 return null; // Or handle it in a way that fits your use case
             }
+
+            if(startCalculation === 2){
+                return null
+            }
     
             if (unitQueue.length === 0) {
+                startCalculation+=1
                 const fortunerUnits = Math.floor(totalUnits * (ratios.fortuner / 100));
                 const zenixUnits = Math.floor(totalUnits * (ratios.zenix / 100));
                 const innovaUnits = Math.floor(totalUnits * (ratios.innova / 100));
@@ -93,8 +130,15 @@ const SchedulledConsumption = async () => {
                     ...Array(zenixUnits).fill("Zenix"),
                     ...Array(innovaUnits).fill("Innova"),
                 ];
+                unitQueue = shuffleArray(unitQueue)
                 // console.log("unitQueue :", unitQueue)
             }
+            // const totals = unitQueue.reduce((acc, item) => {
+            //     acc[item] = (acc[item] || 0) + 1;
+            //     return acc;
+            //   }, {});
+            
+            // console.log("total queue :", totals)
             return unitQueue.shift(); // Dequeue the next unit
         };
     })();
@@ -212,6 +256,19 @@ const SchedulledConsumption = async () => {
         }, tactTime * 1000); // Run every tactTime seconds
     };
 
+    // setInterval(async()=>{
+    //     // console.warn("tes")
+    //     // Calculate Total Units Per Day
+    //     const totalMinutes = 455
+    //     const ratios = await getRatios();
+    //     const totalUnitsPerDay = Math.round(totalMinutes / (ratios.tact_time_1 / 60) * (ratios.efficiency_1 / 100))
+
+    //     const unit = getNextUnit(totalUnitsPerDay, ratios); // Get the next unit
+    //     if(!unit){
+    //         return null
+    //     }
+    // }, 1000)
+
     const monitorTactTimeChanges = () => {
         // Check periodically for changes in tactTime
         setInterval(async () => {
@@ -226,7 +283,7 @@ const SchedulledConsumption = async () => {
         }, 5000); // Check for changes every 5 seconds (adjust as needed)
     };
 
-
+    
 
 
     // Start monitoring and scheduling

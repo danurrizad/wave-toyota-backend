@@ -74,6 +74,36 @@ const SchedulledConsumption2 = async () => {
 
     const getNextUnit = (() => {
         let unitQueue = [];
+        let startCalculation = 0;
+
+        // Function to reset the unitQueue at midnight
+        const resetUnitQueueDaily = () => {
+            const now = new Date();
+            const nextMidnight = new Date();
+            nextMidnight.setHours(24, 0, 0, 0); // Set to the next midnight
+
+            const timeUntilMidnight = nextMidnight - now;
+
+            // Set a timeout to clear the unitQueue at the next midnight
+            setTimeout(() => {
+                unitQueue.length = 0; // Reset the queue
+                console.log("unitQueue has been reset for the new day!");
+                resetUnitQueueDaily(); // Schedule the next reset
+            }, timeUntilMidnight);
+        };
+
+        // Initialize the daily reset function
+        resetUnitQueueDaily();
+
+        // Function to shuffle an array
+        const shuffleArray = (array) => {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]]; // Swap elements
+            }
+            return array;
+        };
+
         return (totalUnits, ratios) => {
             // Check if all ratios are 0
             const totalRatios = ratios.avanza + ratios.yaris + ratios.calya;
@@ -81,8 +111,13 @@ const SchedulledConsumption2 = async () => {
                 console.warn("All ratio values are 0. No units can be allocated.");
                 return null; // Or handle it in a way that fits your use case
             }
+
+            if(startCalculation === 2){
+                return null
+            }
     
             if (unitQueue.length === 0) {
+                startCalculation+=1
                 const avanzaUnits = Math.floor(totalUnits * (ratios.avanza / 100));
                 const yarisUnits = Math.floor(totalUnits * (ratios.yaris / 100));
                 const calyaUnits = Math.floor(totalUnits * (ratios.calya / 100));
@@ -92,6 +127,7 @@ const SchedulledConsumption2 = async () => {
                     ...Array(yarisUnits).fill("Yaris"),
                     ...Array(calyaUnits).fill("Calya"),
                 ];
+                unitQueue = shuffleArray(unitQueue)
             }
             return unitQueue.shift(); // Dequeue the next unit
         };
