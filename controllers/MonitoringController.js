@@ -41,9 +41,9 @@ export const updateMonitoring = async(req, res) => {
         if(!material_no || !plant){
             return res.status(404).json({ message: "Please provide material no and plant!"})
         }
-        if(!visualization_name){
-            return res.status(404).json({ message: "Please fill out all forms!"})
-        }
+        // if(!visualization_name){
+        //     return res.status(404).json({ message: "Please fill out all forms!"})
+        // }
 
         const monitoringFound = await Monitoring.findOne({
             where: {
