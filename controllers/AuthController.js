@@ -4,7 +4,7 @@ import User from "../models/UserModel.js";
 
 // Generate tokens
 const generateTokens = (userId) => {
-  const accessToken = jwt.sign({ id: userId }, process.env.JWT_SECRET, { expiresIn: "1h" });
+  const accessToken = jwt.sign({ id: userId }, process.env.JWT_SECRET, { expiresIn: "1d" });
   const refreshToken = jwt.sign({ id: userId }, process.env.JWT_REFRESH_SECRET, { expiresIn: "7d" });
   return { accessToken, refreshToken };
 };
