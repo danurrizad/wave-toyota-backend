@@ -26,7 +26,7 @@ const Monitoring = db.define(
         },
         visualization_name: {
             type: DataTypes.STRING(30),
-            allowNull: false,
+            allowNull: true,
         },
         created_by: {
             type: DataTypes.STRING(20),
