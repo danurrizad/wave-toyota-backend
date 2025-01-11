@@ -28,9 +28,9 @@ const SchedulledConsumption = async () => {
             { start: "14:40", end: "16:30" },
         ];
 
-        if (dayOfWeek >= 1 && dayOfWeek <= 5) {
+        if (dayOfWeek >= 1 && dayOfWeek <= 6) {
             const currentTime = now.format("HH:mm");
-            const timeRanges = dayOfWeek === 5 ? fridayTimeRanges : defaultTimeRanges;
+            const timeRanges = dayOfWeek === 6 ? fridayTimeRanges : defaultTimeRanges;
 
             return timeRanges.some(({ start, end }) => {
                 return currentTime >= start && currentTime <= end;
