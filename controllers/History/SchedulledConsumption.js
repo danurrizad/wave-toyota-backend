@@ -76,26 +76,28 @@ const SchedulledConsumption = async () => {
     const getNextUnit = (() => {
         let unitQueue = [];
         let startCalculation = 0;
-
-        // Function to reset the unitQueue at midnight
+        const unitConsumptionLog = []; // Tracks consumption with timestamps
+    
+        // Function to reset the unitQueue and log at midnight
         const resetUnitQueueDaily = () => {
             const now = new Date();
             const nextMidnight = new Date();
             nextMidnight.setHours(24, 0, 0, 0); // Set to the next midnight
-
+    
             const timeUntilMidnight = nextMidnight - now;
-
-            // Set a timeout to clear the unitQueue at the next midnight
+    
+            // Set a timeout to clear the unitQueue and consumption log at the next midnight
             setTimeout(() => {
                 unitQueue.length = 0; // Reset the queue
-                console.log("unitQueue has been reset for the new day!");
+                unitConsumptionLog.length = 0; // Clear the consumption log
+                console.log("unitQueue and unitConsumptionLog have been reset for the new day!");
                 resetUnitQueueDaily(); // Schedule the next reset
             }, timeUntilMidnight);
         };
-
+    
         // Initialize the daily reset function
         resetUnitQueueDaily();
-
+    
         // Function to shuffle an array
         const shuffleArray = (array) => {
             for (let i = array.length - 1; i > 0; i--) {
@@ -104,44 +106,82 @@ const SchedulledConsumption = async () => {
             }
             return array;
         };
-        
-        return (totalUnits, ratios) => {
-            // console.warn("total units :", totalUnits)
-            // console.warn("startCalculation :", startCalculation)
+    
+        // Function to remove consumed units from the queue
+        const removeConsumedUnits = (queue, consumedUnits) => {
+            const consumedCount = {};
+            consumedUnits.forEach(unit => {
+                consumedCount[unit] = (consumedCount[unit] || 0) + 1;
+            });
+    
+            return queue.filter(unit => {
+                if (consumedCount[unit]) {
+                    consumedCount[unit] -= 1;
+                    return false; // Remove the unit from the queue
+                }
+                return true; // Keep the unit
+            });
+        };
+    
+        // Function to calculate produced units for the current day
+        const getProducedUnitsToday = () => {
+            const today = new Date().toISOString().split("T")[0]; // Get today's date (YYYY-MM-DD)
+            const producedToday = unitConsumptionLog.filter(record =>
+                record.consumption_time.startsWith(today)
+            );
+    
+            const producedCount = {};
+            producedToday.forEach(record => {
+                producedCount[record.unit] = (producedCount[record.unit] || 0) + 1;
+            });
+    
+            return producedCount;
+        };
+    
+        return (totalUnits, ratios, consumedUnits = []) => {
             // Check if all ratios are 0
             const totalRatios = ratios.fortuner + ratios.zenix + ratios.innova;
             if (totalRatios === 0) {
                 console.warn("All ratio values are 0. No units can be allocated.");
                 return null; // Or handle it in a way that fits your use case
             }
-
-            if(startCalculation === 2){
-                return null
+    
+            if (startCalculation === 2) {
+                return null;
             }
     
             if (unitQueue.length === 0) {
-                startCalculation+=1
+                startCalculation += 1;
                 const fortunerUnits = Math.floor(totalUnits * (ratios.fortuner / 100));
                 const zenixUnits = Math.floor(totalUnits * (ratios.zenix / 100));
                 const innovaUnits = Math.floor(totalUnits * (ratios.innova / 100));
-                
+    
                 unitQueue = [
                     ...Array(fortunerUnits).fill("Fortuner"),
                     ...Array(zenixUnits).fill("Zenix"),
                     ...Array(innovaUnits).fill("Innova"),
                 ];
-                unitQueue = shuffleArray(unitQueue)
-                // console.log("unitQueue :", unitQueue)
+                unitQueue = shuffleArray(unitQueue);
             }
-            // const totals = unitQueue.reduce((acc, item) => {
-            //     acc[item] = (acc[item] || 0) + 1;
-            //     return acc;
-            //   }, {});
-            
-            // console.log("total queue :", totals)
-            return unitQueue.shift(); // Dequeue the next unit
+    
+            // Remove consumed units from the queue
+            unitQueue = removeConsumedUnits(unitQueue, consumedUnits);
+    
+            const nextUnit = unitQueue.shift(); // Dequeue the next unit
+    
+            // Log the consumption with a timestamp
+            if (nextUnit) {
+                unitConsumptionLog.push({
+                    unit: nextUnit,
+                    consumption_time: new Date().toISOString(),
+                });
+            }
+    
+            console.log("Produced units today:", getProducedUnitsToday());
+            return nextUnit;
         };
     })();
+    
     
 
     const createConsumptionCalculation = async () => {
