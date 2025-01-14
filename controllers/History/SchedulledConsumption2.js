@@ -75,6 +75,7 @@ const SchedulledConsumption2 = async () => {
     const getNextUnit = (() => {
         let unitQueue = [];
         let startCalculation = 0;
+        const unitConsumptionLog = []; // Tracks consumption with timestamps
 
         // Function to reset the unitQueue at midnight
         const resetUnitQueueDaily = () => {
@@ -87,6 +88,7 @@ const SchedulledConsumption2 = async () => {
             // Set a timeout to clear the unitQueue at the next midnight
             setTimeout(() => {
                 unitQueue.length = 0; // Reset the queue
+                unitConsumptionLog.length = 0; // Clear the consumption log
                 console.log("unitQueue has been reset for the new day!");
                 resetUnitQueueDaily(); // Schedule the next reset
             }, timeUntilMidnight);
@@ -104,7 +106,38 @@ const SchedulledConsumption2 = async () => {
             return array;
         };
 
-        return (totalUnits, ratios) => {
+        // Function to remove consumed units from the queue
+        const removeConsumedUnits = (queue, consumedUnits) => {
+            const consumedCount = {};
+            consumedUnits.forEach(unit => {
+                consumedCount[unit] = (consumedCount[unit] || 0) + 1;
+            });
+    
+            return queue.filter(unit => {
+                if (consumedCount[unit]) {
+                    consumedCount[unit] -= 1;
+                    return false; // Remove the unit from the queue
+                }
+                return true; // Keep the unit
+            });
+        };
+    
+        // Function to calculate produced units for the current day
+        const getProducedUnitsToday = () => {
+            const today = new Date().toISOString().split("T")[0]; // Get today's date (YYYY-MM-DD)
+            const producedToday = unitConsumptionLog.filter(record =>
+                record.consumption_time.startsWith(today)
+            );
+    
+            const producedCount = {};
+            producedToday.forEach(record => {
+                producedCount[record.unit] = (producedCount[record.unit] || 0) + 1;
+            });
+    
+            return producedCount;
+        };
+
+        return (totalUnits, ratios, consumedUnits = []) => {
             // Check if all ratios are 0
             const totalRatios = ratios.avanza + ratios.yaris + ratios.calya;
             if (totalRatios === 0) {
@@ -129,7 +162,21 @@ const SchedulledConsumption2 = async () => {
                 ];
                 unitQueue = shuffleArray(unitQueue)
             }
-            return unitQueue.shift(); // Dequeue the next unit
+            // Remove consumed units from the queue
+            unitQueue = removeConsumedUnits(unitQueue, consumedUnits);
+    
+            const nextUnit = unitQueue.shift(); // Dequeue the next unit
+    
+            // Log the consumption with a timestamp
+            if (nextUnit) {
+                unitConsumptionLog.push({
+                    unit: nextUnit,
+                    consumption_time: new Date().toISOString(),
+                });
+            }
+    
+            console.log("Produced units today:", getProducedUnitsToday());
+            return nextUnit;
         };
     })();
 
@@ -140,8 +187,12 @@ const SchedulledConsumption2 = async () => {
             const ratios = await getRatios();
             const totalUnitsPerDay = Math.round(totalMinutes / (ratios.tact_time_2 / 60) * (ratios.efficiency_2 / 100))
 
-            const time = moment().tz("Asia/Jakarta");
             const unit = getNextUnit(totalUnitsPerDay, ratios); // Get the next unit
+            if(!unit){
+                return null
+            }
+
+            const time = moment().tz("Asia/Jakarta");
 
             const setup = await Setup.findAll({
                 where: {
