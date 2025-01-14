@@ -203,58 +203,57 @@ const SchedulledConsumption2 = async () => {
             });
             
             // Dynamically fetch `Gentani` data based on the current unit
-                const gentani = await Gentani.findAll({
-                    where: {
-                        [`quantity_${unit.toLowerCase()}`]: { [Op.gt]: 0 }, // Query based on the unit's specific quantity field
-                    },
-                });
+            const gentani = await Gentani.findAll({
+                where: {
+                    [`quantity_${unit.toLowerCase()}`]: { [Op.gt]: 0 }, // Query based on the unit's specific quantity field
+                },
+            });
 
             const setupsFound = setup.map((index) => index.dataValues);
             const gentanisFound = gentani.map((index) => index.dataValues);
 
-            gentanisFound.forEach(async (gentaniItem) => {
-                setupsFound.forEach(async (setupItem) => {
+            setupsFound.forEach( async(setupItem) => {
+                gentanisFound.forEach( async(gentaniItem) => {
                     if (
                         setupItem.material_no === gentaniItem.material_no &&
                         setupItem.plant === gentaniItem.plant
                     ){
-                         // Use the appropriate field for quantity based on the unit
-                         const unitQuantityField = `quantity_${unit.toLowerCase()}`;
-                         const quantityForUnit = gentaniItem[unitQuantityField] || 0;
- 
-                         // Calculate the new total for the unit
-                         const tempTotal = Math.round((setupItem.total - quantityForUnit) * 100) / 100;
-                         const newTotal = tempTotal < 0 ? 0 : tempTotal;
- 
-                         await Setup.update(
-                             { total: newTotal },
-                             { where: { setup_id: setupItem.setup_id } }
-                         );
- 
-                         await Consumption.create({
-                             material_no: gentaniItem.material_no,
-                             material_desc: gentaniItem.material_desc,
-                             plant: gentaniItem.plant,
-                             consumption_date: time.format("YYYY-MM-DD"),
-                             consumption_time: time.format("YYYY-MM-DD HH:mm:ss"),
-                             katashiki: gentaniItem.katashiki,
-                             vin_no: "-",
-                             body_seq: "-",
-                             initial_stock: setupItem.total,
-                             final_stock: newTotal,
-                             qty: quantityForUnit, // Log the specific unit consumption
-                             unit: unit, // Add the unit column
-                         });
+                        // Use the appropriate field for quantity based on the unit
+                        const unitQuantityField = `quantity_${unit.toLowerCase()}`;
+                        const quantityForUnit = gentaniItem[unitQuantityField] || 0;
+
+                        // Calculate the new total for the unit
+                        const tempTotal = Math.round((setupItem.total - quantityForUnit) * 100) / 100;
+                        const newTotal = tempTotal < 0 ? 0 : tempTotal;
+
+                        await Setup.update(
+                            { total: newTotal },
+                            { where: { setup_id: setupItem.setup_id } }
+                        );
+
+                        await Consumption.create({
+                            material_no: gentaniItem.material_no,
+                            material_desc: gentaniItem.material_desc,
+                            plant: gentaniItem.plant,
+                            consumption_date: time.format("YYYY-MM-DD"),
+                            consumption_time: time.format("YYYY-MM-DD HH:mm:ss"),
+                            katashiki: gentaniItem.katashiki,
+                            vin_no: "-",
+                            body_seq: "-",
+                            initial_stock: setupItem.total,
+                            final_stock: newTotal,
+                            qty: quantityForUnit, // Log the specific unit consumption
+                            unit: unit, // Add the unit column
+                        });
                     }
                 })
             })
-            
+           
         } catch (error) {
             console.error("Error during consumption calculation:", error);
             return null;
         }
     };
-
     let tactTime = 0; // Initial value
     let intervalId = null; // To store the interval ID
 
