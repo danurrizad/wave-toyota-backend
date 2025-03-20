@@ -37,7 +37,7 @@ const Setup = db.define(
             allowNull: false,
         },
         total: {
-            type: DataTypes.DECIMAL,
+            type: DataTypes.DECIMAL(10, 4),
             allowNull: false,
         },
         created_by: {
