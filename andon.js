@@ -62,7 +62,7 @@ app.use(express.json())
 // function for consumption using assumption in Gentani
 SchedulledConsumption() // Plant 1
 SchedulledConsumption2() // Plant 2
-// ConsumptionClearance()
+ConsumptionClearance()
 
 app.use("/api", AuthRouter);
 app.use("/api", UserRouter);

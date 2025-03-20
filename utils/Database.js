@@ -26,7 +26,7 @@ const db = new Sequelize(process.env.DB_DATABASE, process.env.DB_USER, process.e
   },
 });
 
-db.sync({ alter: true }).then(() => console.log("Database synchronized"));
+// db.sync({ alter: true }).then(() => console.log("Database synchronized"));
 // db.sync({ alter: false }).then(() => console.log("Database synchronized without altering table..."));
 
 
