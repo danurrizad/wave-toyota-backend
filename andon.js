@@ -17,10 +17,11 @@ import MonitoringRouter from './routes/MonitoringRouter.js'
 import ConsumptionRouter from './routes/History/ConsumptionRouter.js'
 import SupplyHistoryRouter from './routes/History/SupplyHistoryRouter.js'
 
+import DaysRouter from './routes/DaysRouter.js';
 import RatioProdRouter from './routes/RatioProdRouter.js';
 import SchedulledConsumption from './controllers/History/SchedulledConsumption.js';
 import SchedulledConsumption2 from './controllers/History/SchedulledConsumption2.js';
-
+import ConsumptionClearance from './jobs/ConsumptionClearance.js'
 
 dotenv.config();
 const app = express();
@@ -50,6 +51,7 @@ app.use(
         credentials: true,
         origin: [
             'http://localhost:3000',
+            'http://localhost:3005',
             'https://wave-toyota.web.app'
         ]
     })
@@ -58,8 +60,9 @@ app.use(
 app.use(express.json())
 
 // function for consumption using assumption in Gentani
-SchedulledConsumption()
-SchedulledConsumption2()
+SchedulledConsumption() // Plant 1
+SchedulledConsumption2() // Plant 2
+// ConsumptionClearance()
 
 app.use("/api", AuthRouter);
 app.use("/api", UserRouter);
@@ -73,6 +76,7 @@ app.use("/api", ConsumptionRouter)
 app.use("/api", SupplyHistoryRouter)
 app.use("/api", RatioProdRouter)
 app.use("/api", RoleRouter)
+app.use("/api", DaysRouter)
 
 app.get('/', (req, res) => {
   res.send('Successful response.');
