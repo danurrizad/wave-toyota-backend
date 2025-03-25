@@ -8,10 +8,20 @@ import Consumption from "../../models/History/ConsumptionModel.js";
 import Days from './../../models/DaysModel.js';
 
 const SchedulledConsumption = async () => {
+
   const isWithinRange = async() => {
     const now = moment().tz("Asia/Jakarta");
     const dayOfWeek = now.isoWeekday(); // 1 = Monday, 7 = Sunday
     const currentTime = now.format("HH:mm");
+    const currentDate = now.format("YYYY-MM-DD");
+
+    // If the current date is within the holiday period, return false
+    const holidayStart = "2025-03-28"
+    const holidayEnd = "2025-04-06"
+
+    if (currentDate >= holidayStart && currentDate <= holidayEnd) {
+      return false;
+    }
 
     const daysSetup = await Days.findOne({
       where: { id: 1}
