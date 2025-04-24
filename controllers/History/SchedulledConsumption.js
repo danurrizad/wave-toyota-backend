@@ -35,60 +35,74 @@ const SchedulledConsumption = async () => {
     const saturdayIsOn = daysSetup.dataValues.plant1_saturday
     const sundayIsOn = daysSetup.dataValues.plant1_sunday
 
-    // if (dayOfWeek === 7) return false; // Sunday is always out of range
+    // -----------------------------------
+    const dayTimeRange = [
+      { start: "07:15", end: "09:30" },
+      { start: "09:40", end: "11:45" },
+      { start: "12:30", end: "14:30" },
+      { start: "14:40", end: "16:00" },
+    ]
 
-    const defaultTimeRanges = [
-        { start: "07:15", end: "09:30" },
-        { start: "09:40", end: "11:45" },
-        { start: "12:30", end: "14:30" },
-        { start: "14:40", end: "16:00" },
-        { start: "21:00", end: "22:00" },
-        { start: "22:10", end: "23:59" },
-        { start: "00:30", end: "02:30" },
-        { start: "02:40", end: "04:30" },
-        { start: "04:45", end: "05:45" },
-    ];
-
-    const mondayTimeRanges = [
+    const fridayDayTimeRange = [
       { start: "07:15", end: "09:30" },
       { start: "09:40", end: "11:45" },
       { start: "13:00", end: "14:30" },
       { start: "14:40", end: "16:30" },
+    ]
+
+    const nightTimeRange1 = [
       { start: "21:00", end: "22:00" },
       { start: "22:10", end: "23:59" },
     ]
 
-    const fridayTimeRanges = [
-        { start: "07:15", end: "09:30" },
-        { start: "09:40", end: "11:45" },
-        { start: "13:00", end: "14:30" },
-        { start: "14:40", end: "16:30" },
-        { start: "21:00", end: "22:00" },
-        { start: "22:10", end: "23:59" },
-        { start: "00:30", end: "02:30" },
-        { start: "02:40", end: "04:30" },
-        { start: "04:45", end: "05:45" },
-    ];
-
-    const saturdayTimeRanges = [
-      // { start: "00:30", end: "00:31" },
+    const nightTimeRange2 = [
       { start: "00:30", end: "02:30" },
       { start: "02:40", end: "04:30" },
       { start: "04:45", end: "05:45" },
-      { start: "07:15", end: "09:30" },
-      { start: "09:40", end: "11:45" },
-      { start: "13:00", end: "15:00" },
-    ];
+    ]
 
-    const timeRanges = (dayOfWeek === 7 && sundayIsOn) ? saturdayTimeRanges 
-        : (dayOfWeek === 6 && saturdayIsOn) ? saturdayTimeRanges 
-        : (dayOfWeek === 5 && fridayIsOn) ? fridayTimeRanges 
-        : (dayOfWeek === 4 && thursdayIsOn) ? defaultTimeRanges
-        : (dayOfWeek === 3 && wednesdayIsOn) ? defaultTimeRanges
-        : (dayOfWeek === 2 && tuesdayIsOn) ? defaultTimeRanges
-        : (dayOfWeek === 1 && mondayIsOn) ? mondayTimeRanges
-        : [];
+    
 
+
+    const timeRanges = 
+      // Minggu 
+        (dayOfWeek === 7 && sundayIsOn) ? nightTimeRange1
+        
+        // Senin 
+      : (dayOfWeek === 1 && sundayIsOn && !mondayIsOn) ? nightTimeRange2
+      : (dayOfWeek === 1 && mondayIsOn && !sundayIsOn) ? [...dayTimeRange, ...nightTimeRange1]
+      : (dayOfWeek === 1 && mondayIsOn) ? [...nightTimeRange2, ...dayTimeRange, ...nightTimeRange1]
+       
+      // Selasa
+      : (dayOfWeek === 2 && mondayIsOn && !tuesdayIsOn ) ? nightTimeRange2
+      : (dayOfWeek === 2 && tuesdayIsOn && !mondayIsOn ) ? [...dayTimeRange, ...nightTimeRange1]
+      : (dayOfWeek === 2 && tuesdayIsOn) ? [...nightTimeRange2, ...dayTimeRange, ...nightTimeRange1]
+
+      // Rabu  
+      : (dayOfWeek === 3 && tuesdayIsOn && !wednesdayIsOn) ? nightTimeRange2
+      : (dayOfWeek === 3 && wednesdayIsOn && !tuesdayIsOn) ? [ ...dayTimeRange, ...nightTimeRange1]
+      : (dayOfWeek === 3 && wednesdayIsOn ) ? [...nightTimeRange2, ...dayTimeRange, ...nightTimeRange1]
+
+      // Kamis  
+      : (dayOfWeek === 4 && wednesdayIsOn && !thursdayIsOn) ? nightTimeRange2
+      : (dayOfWeek === 4 && thursdayIsOn && !wednesdayIsOn ) ? [...dayTimeRange, ...nightTimeRange1]
+      : (dayOfWeek === 4 && thursdayIsOn ) ? [...nightTimeRange2, ...dayTimeRange, ...nightTimeRange1]
+        
+      // Jumat
+      : (dayOfWeek === 5 && thursdayIsOn && !fridayIsOn ) ? nightTimeRange2
+      : (dayOfWeek === 5 && fridayIsOn && !thursdayIsOn ) ? [...fridayDayTimeRange, nightTimeRange1]      
+      : (dayOfWeek === 5 && fridayIsOn ) ? [...nightTimeRange2, ...fridayDayTimeRange, ...nightTimeRange1]
+
+      // Sabtu
+      : (dayOfWeek === 6 && fridayIsOn && !saturdayIsOn ) ? nightTimeRange2
+      : (dayOfWeek === 6 && saturdayIsOn && !fridayIsOn ) ? dayTimeRange
+      : (dayOfWeek === 6 && saturdayIsOn ) ? [...nightTimeRange2, ...dayTimeRange]
+
+      : [];
+      
+
+    // console.log("Time range: ", timeRanges.some(({ start, end }) => currentTime >= start && currentTime <= end))
+    // console.log("Time range: ", timeRanges)
     return timeRanges.some(({ start, end }) => currentTime >= start && currentTime <= end);
 };
 
