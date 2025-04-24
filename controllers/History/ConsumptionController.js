@@ -1,3 +1,4 @@
+import { Op } from "sequelize";
 import Gentani from "../../models/GentaniModel.js";
 import Consumption from "../../models/History/ConsumptionModel.js";
 import Material from "../../models/MaterialModel.js";
@@ -9,6 +10,35 @@ export const getConsumptionAll = async(req, res) => {
         const response = await Consumption.findAll()
         res.status(200).json({ message: "All consumption found!", data: response})
 
+    } catch (error) {
+        res.status(500).json({ message: "Internal server error!", error: error.message})
+    }
+}
+
+export const getConsumptionOnRange = async(req, res) => {
+    try {
+        const { startDate, endDate } = req.query
+        if(!startDate && !endDate){
+            const responseAll = await Consumption.findAll()
+            return res.status(200).json({ message: "All data consumption history found!", data: responseAll})
+        }
+        if(!startDate || !endDate){
+            return res.status(400).json({ message: "Please provide range date!"})
+        }
+        const endOfDate = new Date(endDate);
+        endOfDate.setDate(endOfDate.getDate() + 1)
+
+        const response = await Consumption.findAll({
+            where: {
+                consumption_date: { 
+                    [Op.between]: [startDate, endOfDate.toLocaleDateString('en-CA')]
+                }  
+            }
+        })
+        if(!response){
+            return res.status(404).json({ message: "Consumption history data not found!"})
+        }
+        res.status(200).json({ message: "Consumption history data found!", data: response})
     } catch (error) {
         res.status(500).json({ message: "Internal server error!", error: error.message})
     }
@@ -78,6 +108,33 @@ export const createConsumption = async(req, res) => {
 
         res.status(201).json({ message: "Consumption history created!", data: response})
 
+    } catch (error) {
+        res.status(500).json({ message: "Internal server error!", error: error.message})
+    }
+}
+
+export const getTotalUnitsToday = async(req, res) => {
+    try {
+        const { startDate, endDate } = req.query
+        if(!startDate || !endDate){
+            return res.status(400).json({ message: "Please provide date range!"})
+        }
+        const endOfDay = new Date(endDate);
+        endOfDay.setDate(endOfDay.getDate() + 1);
+        const consumptionToday = await Consumption.findAll({
+            where: {
+                consumption_date: {
+                    [Op.between]: [startDate, endOfDay],
+                },
+            }
+        })
+        const Zenix = consumptionToday.filter((data)=>data.unit === "Zenix").length
+        const Innova = consumptionToday.filter((data)=>data.unit === "Innova").length
+        const Fortuner = consumptionToday.filter((data)=>data.unit === "Fortuner").length
+        const Avanza = consumptionToday.filter((data)=>data.unit === "Avanza").length
+        const Calya = consumptionToday.filter((data)=>data.unit === "Calya").length
+        const Yaris = consumptionToday.filter((data)=>data.unit === "Yaris").length
+        res.status(200).json({ message: "Total units data found!", data: { Zenix, Innova, Fortuner, Avanza, Calya, Yaris }})
     } catch (error) {
         res.status(500).json({ message: "Internal server error!", error: error.message})
     }
