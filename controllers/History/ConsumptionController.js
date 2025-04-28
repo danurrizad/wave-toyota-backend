@@ -121,19 +121,43 @@ export const getTotalUnitsToday = async(req, res) => {
         }
         const endOfDay = new Date(endDate);
         endOfDay.setDate(endOfDay.getDate() + 1);
+        console.log('start: ', startDate)
+        console.log('end: ', endOfDay.toLocaleDateString('en-CA'))
         const consumptionToday = await Consumption.findAll({
             where: {
                 consumption_date: {
-                    [Op.between]: [startDate, endOfDay],
+                    [Op.between]: [startDate, endOfDay.toLocaleDateString('en-CA')],
                 },
             }
         })
-        const Zenix = consumptionToday.filter((data)=>data.unit === "Zenix").length
-        const Innova = consumptionToday.filter((data)=>data.unit === "Innova").length
-        const Fortuner = consumptionToday.filter((data)=>data.unit === "Fortuner").length
-        const Avanza = consumptionToday.filter((data)=>data.unit === "Avanza").length
-        const Calya = consumptionToday.filter((data)=>data.unit === "Calya").length
-        const Yaris = consumptionToday.filter((data)=>data.unit === "Yaris").length
+        
+        const units = ["Zenix", "Innova", "Fortuner", "Avanza", "Calya", "Yaris"];
+        const seenTimes = {}; 
+        const counts = {};
+
+        units.forEach(unit => {
+        seenTimes[unit] = new Set();
+        counts[unit] = 0;
+        });
+
+        consumptionToday.forEach(data => {
+        if (units.includes(data.unit)) {
+            const timeKey = new Date(data.consumption_time).toISOString(); 
+            if (!seenTimes[data.unit].has(timeKey)) {
+            seenTimes[data.unit].add(timeKey);
+            counts[data.unit]++;
+            }
+        }
+        });
+
+        const Zenix = counts["Zenix"];
+        const Innova = counts["Innova"];
+        const Fortuner = counts["Fortuner"];
+        const Avanza = counts["Avanza"];
+        const Calya = counts["Calya"];
+        const Yaris = counts["Yaris"];
+
+    
         res.status(200).json({ message: "Total units data found!", data: { Zenix, Innova, Fortuner, Avanza, Calya, Yaris }})
     } catch (error) {
         res.status(500).json({ message: "Internal server error!", error: error.message})
