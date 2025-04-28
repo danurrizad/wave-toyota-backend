@@ -76,6 +76,7 @@ export const deleteRole = async(req, res) => {
             return res.status(404).json({ message: "Role not found!"})
         }
         await Role.destroy({ where: { id: role_id}})
+        res.status(201).json({ message: `Role ${roleFound.role_name} deleted!`})
     } catch (error) {
         res.status(500).json({ message: "Internal server error!"})
     }
