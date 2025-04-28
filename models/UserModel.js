@@ -64,19 +64,5 @@ User.addHook("afterCreate", async (user, options) => {
   });
 });
 
-// User.afterCreate(async (user, options) => {
-//   const role = await Role.findByPk(user.roleId);
-//   if (role) {
-//     user.role_name = role.role_name;
-//   }
-// });
-
-// User.beforeUpdate(async (user, options) => {
-//   const role = await Role.findByPk(user.roleId);
-//   if (role) {
-//     user.role_name = role.role_name;
-//   }
-// });
-
 
 export default User;

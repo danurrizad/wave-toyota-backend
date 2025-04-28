@@ -3,12 +3,11 @@ import User from "../models/UserModel.js";
 import Role from "../models/RoleModel.js";
 
 export const registerUser = async (req, res) => {
-  const { username, password, email, role_name } = req.body;
-  console.log("Body :", req.body)
+  const { username, email, roleId } = req.body;
 
   try {
-    if(!username || !password || !email ||!role_name){
-      return res.status(404).json({ message: "Please fill out all of the forms!"})
+    if(!username || !email ||!roleId){
+      return res.status(400).json({ message: "Please fill out all of the forms!"})
     }
     // Check if username or email already exists
     const existingUser = await User.findOne({
@@ -27,25 +26,21 @@ export const registerUser = async (req, res) => {
       return res.status(400).json({ message: "Email already in use" });
     }
 
-    if(password.length < 6){
-      return res.status(400).json({ message: "Password should be at least 6 character long"})
-    }
-
-    const role = await Role.findOne({ where: { role_name: role_name}})
+    const role = await Role.findOne({ where: { id: roleId}})
     if(!role){
-      return res.status(400).json({ message: "Failed to register! Role incorrect"})
+      return res.status(400).json({ message: "Failed to register! Incorrect Role!"})
     }
 
-    // Hash the password
-    const hashedPassword = await bcrypt.hash(password, 10);
+    // Hash the default password for "toyota123"
+    const hashedPassword = await bcrypt.hash("toyota123", 10);
 
     // Create the user
     const newUser = await User.create({
-      username,
+      username: username,
       password: hashedPassword,
-      email,
+      email: email,
       roleId: role.id,
-      role_name: "-"
+      role_name: role.role_name
     });
 
     // Optional: Automatically log in the user after registration
@@ -59,15 +54,80 @@ export const registerUser = async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.log("ERROR :", error)
+    res.status(500).json({ message: "Internal server error!", error: error.message})
   }
 };
 
 export const getUsers = async (req, res) => {
   try {
     const users = await User.findAll();
-    res.send(users);
+    res.status(200).json({ data: users});
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: "Internal server error!", error: error.message})
+
   }
 };
+
+export const updateUserById = async(req, res) => {
+  try {
+    const { roleId } = req.body
+  const userId = req.params.userId
+
+  if(!roleId){
+    return res.status(400).json({ message: "Please provide role!"})
+  }
+  if(!userId){
+    return res.status(400).json({ message: "Please provide user ID"})
+  }
+  const foundRole = await Role.findOne({ 
+    where: {
+      id: roleId
+    }
+  })
+  if(!foundRole){
+    return res.status(404).json({ message: "Can't find role!"})
+  }
+  const foundUser = await User.findOne({
+    where: {
+      id: userId
+    }
+  })
+  if(!foundUser){
+    return res.status(404).json({ message: "Can't find user!"})
+  }
+  await User.update({
+    roleId: foundRole.id,
+    role_name: foundRole.role_name
+  },{
+    where: {
+      id: userId
+    }
+  }) 
+  res.status(201).json({ message: "Role user updated!"})
+  } catch (error) {
+    res.status(500).json({ message: "Internal server error!", error: error.message})
+  }
+}
+
+export const deleteUserById = async(req, res) => {
+  try {
+    const id = req.params.userId
+    if(!id){
+      return res.status(400).json({ message: "Please provide user ID!"})
+    }
+    const userFound = await User.findOne({ 
+      where: { id: id }
+    })
+    if(!userFound){
+      return res.status(404).json({ message: "User not found" })
+    }
+    await User.destroy({
+      where: { id: id }
+    })
+    res.status(200).json({ message: "User deleted!" })
+  } catch (error) {
+    console.log("error: ", error)
+    res.status(500).json({ message: "Internal server error!" })
+  }
+}
