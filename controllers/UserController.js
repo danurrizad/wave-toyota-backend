@@ -131,3 +131,41 @@ export const deleteUserById = async(req, res) => {
     res.status(500).json({ message: "Internal server error!" })
   }
 }
+
+export const changePasswordUserById = async(req, res) => {
+  try {
+    const { currentPass, newPass, confirmPass } = req.body
+    const id = req.params.userId
+    const userFound = await User.findOne({
+      where: { id: id }
+    })
+    if(!userFound){
+      return res.status(400).json({ message: "User not found!" })
+    }
+    if(!currentPass || !newPass || !confirmPass){
+      return res.status(400).json({ message: "Please fill all required fields!" })
+    }
+    if(newPass !== confirmPass){
+      return res.status(400).json({ message: "New password doesn't match!" })
+    }
+
+    const isVerified = await bcrypt.compare(currentPass, userFound.password);
+    if(!isVerified){
+      return res.status(401).json({ message: "Wrong password! Can't verifying that this account is yours." })
+    }
+    const samePassword = await bcrypt.compare(newPass, userFound.password)
+    if(samePassword){
+      return res.status(400).json({ message: "Can't update your new password with your old password!"})
+    }
+    const hashedPassword = await bcrypt.hash(newPass, 10);
+    await User.update({
+      password: hashedPassword
+    }, {
+      where: { id: id }
+    })
+    res.status(201).json({ message: "Password changed!" })
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ message: "Internal server error!", error: error.message})
+  }
+}
