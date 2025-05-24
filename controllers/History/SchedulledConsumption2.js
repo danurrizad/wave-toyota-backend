@@ -27,13 +27,13 @@ const SchedulledConsumption2 = async () => {
       where: { id: 1}
     })
 
-    const mondayIsOn = daysSetup.dataValues.plant1_monday
-    const tuesdayIsOn = daysSetup.dataValues.plant1_tuesday
-    const wednesdayIsOn = daysSetup.dataValues.plant1_wednesday
-    const thursdayIsOn = daysSetup.dataValues.plant1_thursday
-    const fridayIsOn = daysSetup.dataValues.plant1_friday
-    const saturdayIsOn = daysSetup.dataValues.plant1_saturday
-    const sundayIsOn = daysSetup.dataValues.plant1_sunday
+    const mondayIsOn = daysSetup.dataValues.plant2_monday
+    const tuesdayIsOn = daysSetup.dataValues.plant2_tuesday
+    const wednesdayIsOn = daysSetup.dataValues.plant2_wednesday
+    const thursdayIsOn = daysSetup.dataValues.plant2_thursday
+    const fridayIsOn = daysSetup.dataValues.plant2_friday
+    const saturdayIsOn = daysSetup.dataValues.plant2_saturday
+    const sundayIsOn = daysSetup.dataValues.plant2_sunday
 
     // -----------------------------------
     const dayTimeRange = [
