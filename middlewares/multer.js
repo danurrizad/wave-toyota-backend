@@ -1,5 +1,6 @@
 import multer from 'multer';
 
+// Upload .xlsx file only
 const upload = multer({
     storage: multer.memoryStorage(), // Store file in memory
     fileFilter: (req, file, cb) => {

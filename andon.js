@@ -17,11 +17,15 @@ import MonitoringRouter from './routes/MonitoringRouter.js'
 import ConsumptionRouter from './routes/History/ConsumptionRouter.js'
 import SupplyHistoryRouter from './routes/History/SupplyHistoryRouter.js'
 
+import ScheduleRouter from './routes/ScheduleRouter.js'
 import DaysRouter from './routes/DaysRouter.js';
 import RatioProdRouter from './routes/RatioProdRouter.js';
 import SchedulledConsumption from './controllers/History/SchedulledConsumption.js';
 import SchedulledConsumption2 from './controllers/History/SchedulledConsumption2.js';
 import ConsumptionClearance from './jobs/ConsumptionClearance.js'
+
+import TestingConsumption from './controllers/History/TestingConsumption.js'
+import TestingConsumption2 from './controllers/History/TestingConsumption2.js'
 
 dotenv.config();
 const app = express();
@@ -60,8 +64,10 @@ app.use(
 app.use(express.json())
 
 // function for consumption using assumption in Gentani
-SchedulledConsumption() // Plant 1
-SchedulledConsumption2() // Plant 2
+// SchedulledConsumption() // Plant 1
+TestingConsumption()
+// SchedulledConsumption2() // Plant 2
+TestingConsumption2()
 ConsumptionClearance()
 
 app.use("/api", AuthRouter);
@@ -77,6 +83,7 @@ app.use("/api", SupplyHistoryRouter)
 app.use("/api", RatioProdRouter)
 app.use("/api", RoleRouter)
 app.use("/api", DaysRouter)
+app.use("/api", ScheduleRouter)
 
 app.get('/', (req, res) => {
   res.send('Successful response.');
