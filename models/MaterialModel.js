@@ -4,6 +4,7 @@ import Gentani from "./GentaniModel.js";
 import Setup from "./SetupModel.js";
 import SupplyQty from "./SupplyQtyModel.js";
 import Monitoring from "./MonitoringModel.js";
+import SupplyLocation from "./SupplyLocation.js";
 
 const { DataTypes } = Sequelize;
 
@@ -103,7 +104,7 @@ const Material = db.define(
 // Gentani.hasMany(Material, { foreignKey: "gentani_id" })
 // Material.belongsTo(Gentani, { foreignKey: "gentani_id"})
 
-
+// Material.hasMany(SupplyLocation, { foreignKey: 'material_id' });
 // // Add hook to sync changes
 Material.addHook("afterUpdate", async (material, options) => {
   const updatedFields = {
@@ -164,6 +165,28 @@ Material.addHook("afterUpdate", async(material, options) => {
     })
 })
 
+// Relation material-supplyLocation
+// SupplyLocation.hasMany(Material, { foreignKey: "supplyLocation_id", onDelete: "CASCADE"});
+// Material.belongsTo(SupplyLocation, { foreignKey: "supplyLocation_id", onDelete: "CASCADE" });
+
+Material.hasOne(SupplyLocation, { foreignKey: 'material_id' });
+SupplyLocation.belongsTo(Material, { foreignKey: 'material_id' });
+
+// Material.addHook("afterUpdate", async(material, options) => {
+//     const updatedFields = {
+//         material_no: material.material_no,
+//         material_desc: material.material_desc,
+//         plant: material.plant,
+//     }
+
+//     await SupplyLocation.update(updatedFields, {
+//         where: { 
+//             material_no: material.material_no,
+//             plant: material.plant
+//         },
+//     })
+// })
+
 
 // Relation material-monitoring
 Monitoring.hasOne(Material, { foreignKey: "monitoring_id", onDelete: "CASCADE" });
@@ -183,27 +206,6 @@ Material.addHook("afterUpdate", async(material, options) => {
         },
     })
 })
-
-
-// SetupRelation.hasOne(Material, {foreignKey: "material_id"})
-// Material.belongsTo(SetupRelation, {foreignKey: "material_id"})
-
-// Material.addHook("afterCreate", async(material, options) => {
-//     const updatedFields = {
-//         material_no: material.material_no,
-//         material_desc: material.material_desc,
-//         plant: material.plant,
-//         supply_line: material.supply_line,
-//         created_by: material.created_by,
-//         created_at: material.created_at
-//     }
-    
-//     await SetupRelation.create(updatedFields, {
-//         where: {
-//             material_no: material.material_no
-//         }
-//     })
-// })
 
 
 
