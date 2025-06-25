@@ -123,7 +123,7 @@ export const createSupplyHistory = async (req, res) => {
 
         res.status(201).json({ message: "All supply histories successfully created!" });
     } catch (error) {
-        console.error("ERRORRRRRRRRRRR:", error)
+        console.error("Error:", error)
         res.status(500).json({ message: "Internal server error!", error: error.message });
     }
 };

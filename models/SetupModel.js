@@ -48,6 +48,10 @@ const Setup = db.define(
             type: DataTypes.STRING(20),
             allowNull: false,
         },
+        changed_date: {
+            type: DataTypes.DATE,
+            allowNull: true
+        }
     },
     {
         freezeTableName: true,
