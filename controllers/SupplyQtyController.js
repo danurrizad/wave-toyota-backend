@@ -37,6 +37,28 @@ export const getSupplyQtyAll = async(req, res) => {
     }
 }
 
+export const getSupplyQtyByNoPlant = async(req, res) => {
+  try {
+    const { material_no, plant } = req.params
+    if(!material_no || !plant){
+      return res.status(400).json({ message: `Please provide material no and plant!`})
+    }
+    const found = await SupplyQty.findOne({
+      where: {
+        material_no: material_no,
+        plant: plant
+      }
+    })
+    if(!found){
+      return res.status(400).json({ message: `Material No. ${material_no} in plant ${plant} not found!`})
+    }
+    res.status(200).json({ message: "Supply qty data found!", data: found})
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ message: "Internal server error!", error: error})
+  }
+}
+
 
 export const updateSupplyQty = async(req, res) => {
     try {

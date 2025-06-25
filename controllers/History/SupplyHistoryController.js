@@ -1,21 +1,52 @@
 import SupplyHistory from "../../models/History/SupplyHistoryModel.js";
 import Setup from "../../models/SetupModel.js";
 import Material from "../../models/MaterialModel.js";
+import { Op } from "sequelize";
 
-export const getSupplyHistoryAll = async(req, res) => {
+export const getSupplyHistory = async (req, res) => {
     try {
-        const response = await SupplyHistory.findAll()
-        res.status(200).json({ message: "All supply history data found!", data: response})
+        const { startDate, endDate, plant, materialNo } = req.query;
+
+        let whereClause = {};
+
+        if (startDate && endDate) {
+            const endOfDate = new Date(endDate);
+            endOfDate.setDate(endOfDate.getDate() + 1);
+
+            whereClause.supply_date = {
+                [Op.between]: [startDate, endOfDate.toISOString().split('T')[0]],
+            };
+        }
+
+        if (plant) {
+            whereClause.plant = plant;
+        }
+
+        if(materialNo){
+            whereClause.material_no = materialNo
+        }
+
+        const data = await SupplyHistory.findAll({ where: whereClause });
+
+        return res.status(200).json({
+            message: "Supply history found!",
+            data,
+        });
+
     } catch (error) {
-        res.status(500).json({ message: "Internal server error!", error: error.message})
+        console.error(error);
+        return res.status(500).json({
+            message: "Internal server error!",
+            error,
+        });
     }
-}
+};
+
 
 // MULTIPLE CREATION
 export const createSupplyHistory = async (req, res) => {
     try {
         const supplyHistories = req.body; // Expecting an array of supply history data
-
         if (!Array.isArray(supplyHistories) || supplyHistories.length === 0) {
             return res.status(400).json({ message: "No available supply to process for submission!" });
         }
@@ -92,6 +123,7 @@ export const createSupplyHistory = async (req, res) => {
 
         res.status(201).json({ message: "All supply histories successfully created!" });
     } catch (error) {
+        console.error("ERRORRRRRRRRRRR:", error)
         res.status(500).json({ message: "Internal server error!", error: error.message });
     }
 };
