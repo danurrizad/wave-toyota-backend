@@ -13,6 +13,7 @@ import MaterialRouter from './routes/MaterialRouter.js';
 import GentaniRouter from './routes/GentaniRouter.js'
 import SetupRouter from './routes/SetupRouter.js'
 import SupplyQtyRouter  from './routes/SupplyQtyRouter.js';
+import SupplyLocationRouter  from './routes/SupplyLocationRouter.js';
 import MonitoringRouter from './routes/MonitoringRouter.js'
 import ConsumptionRouter from './routes/History/ConsumptionRouter.js'
 import SupplyHistoryRouter from './routes/History/SupplyHistoryRouter.js'
@@ -56,10 +57,14 @@ app.use(
         origin: [
             'http://localhost:3000',
             'http://localhost:3005',
-            'https://wave-toyota.web.app'
+            'https://wave-toyota.web.app',
+            'https://tmmin-andon-supply.web.app',
+            'https://testing-andon-supply.web.app',
+            'https://g5xqwfz1-3005.asse.devtunnels.ms'
         ]
     })
 )
+app.options('*', cors());
 
 app.use(express.json())
 
@@ -77,6 +82,7 @@ app.use("/api", MaterialRouter)
 app.use("/api", GentaniRouter)
 app.use("/api", SetupRouter)
 app.use("/api", SupplyQtyRouter)
+app.use("/api", SupplyLocationRouter)
 app.use("/api", MonitoringRouter)
 app.use("/api", ConsumptionRouter)
 app.use("/api", SupplyHistoryRouter)
@@ -89,10 +95,10 @@ app.get('/', (req, res) => {
   res.send('Successful response.');
 });
 
-// app.listen(port, () => console.log(`Example app is listening on port ${port}.`));
+app.listen(port, () => console.log(`Example app is listening on port ${port}.`));
 
 
 // Membuat server HTTPS
-https.createServer(credentials, app).listen(port, () => {
-    console.log(`Server running at https://${host}:${port}`);
-  });
+// https.createServer(credentials, app).listen(port, () => {
+//     console.log(`Server running at https://${host}:${port}`);
+//   });
