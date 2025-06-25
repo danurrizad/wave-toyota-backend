@@ -3,7 +3,16 @@ import Material from "../models/MaterialModel.js";
 
 export const getSupplyLocationAll = async(req, res) => {
     try {
+        const { locationName, plant } = req.query
+        let condition = {}
+        if(locationName){
+            condition.location_name = locationName
+        }
+        if(plant){
+            condition.plant = plant
+        }
         const supplyLocation = await SupplyLocation.findAll({
+            where: condition,
             include: [
                 {
                     model: Material,

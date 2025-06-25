@@ -25,7 +25,14 @@ export const getSupplyQtyAll = async(req, res) => {
     
         await Promise.all(syncPromises);
 
-        const response = await SupplyQty.findAll();
+        const { plant } = req.query
+        let condition = {}
+        if(plant){
+          condition.plant = plant
+        }
+        const response = await SupplyQty.findAll({
+          where: condition
+        });
         if(!response){
             res.status(404).json({ message: "No Supply Qty data found!"})
             return
