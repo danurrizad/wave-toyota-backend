@@ -20,10 +20,18 @@ export const getMonitoringAll = async(req, res) => {
             }
           );
         });
-    
-        await Promise.all(syncPromises);
 
-        const monitoring = await Monitoring.findAll()
+        await Promise.all(syncPromises);
+        
+        let condition = {}
+        const { visualizationName } = req.query
+        if(visualizationName){
+            condition.visualization_name = visualizationName
+        }
+    
+        const monitoring = await Monitoring.findAll({
+            where: condition
+        })
         if(!monitoring){
             return res.status(404).json({ message: "No Monitoring data found!"})
         }
