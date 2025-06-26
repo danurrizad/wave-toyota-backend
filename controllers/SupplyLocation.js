@@ -1,7 +1,7 @@
 import SupplyLocation from "../models/SupplyLocation.js";
 import Material from "../models/MaterialModel.js";
 
-export const getSupplyLocationAll = async(req, res) => {
+export const getSupplyLocations = async(req, res) => {
     try {
         const { locationName, plant } = req.query
         let condition = {}

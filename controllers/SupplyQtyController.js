@@ -1,7 +1,7 @@
 import SupplyQty from "../models/SupplyQtyModel.js";
 import Material from "../models/MaterialModel.js";
 
-export const getSupplyQtyAll = async(req, res) => {
+export const getSupplyQty = async(req, res) => {
     try {
         // Synchronize Gentani with Material table changes
         const materials = await Material.findAll();

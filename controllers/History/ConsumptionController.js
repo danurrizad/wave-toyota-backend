@@ -5,26 +5,15 @@ import Material from "../../models/MaterialModel.js";
 import Setup from "../../models/SetupModel.js";
 import moment from "moment-timezone"; // Install moment.js if not already installed: npm install moment
 
-export const getConsumptionAll = async(req, res) => {
-    try {
-        const response = await Consumption.findAll()
-        res.status(200).json({ message: "All consumption found!", data: response})
-
-    } catch (error) {
-        res.status(500).json({ message: "Internal server error!", error: error.message})
-    }
-}
-
-export const getConsumptionOnRange = async(req, res) => {
+export const getConsumptions = async(req, res) => {
     try {
         const { startDate, endDate } = req.query
-        if(!startDate && !endDate){
-            const responseAll = await Consumption.findAll()
-            return res.status(200).json({ message: "All data consumption history found!", data: responseAll})
-        }
+        
         if(!startDate || !endDate){
             return res.status(400).json({ message: "Please provide range date!"})
         }
+
+        // +1 date because of the datetype
         const endOfDate = new Date(endDate);
         endOfDate.setDate(endOfDate.getDate() + 1)
 
