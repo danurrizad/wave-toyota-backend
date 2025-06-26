@@ -10,11 +10,8 @@ export const getSupplyHistory = async (req, res) => {
         let whereClause = {};
 
         if (startDate && endDate) {
-            const endOfDate = new Date(endDate);
-            endOfDate.setDate(endOfDate.getDate() + 1);
-
             whereClause.supply_date = {
-                [Op.between]: [startDate, endOfDate.toISOString().split('T')[0]],
+                [Op.between]: [startDate, endDate],
             };
         }
 
