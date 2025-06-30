@@ -47,6 +47,7 @@ export const createSupplyHistory = async (req, res) => {
         if (!Array.isArray(supplyHistories) || supplyHistories.length === 0) {
             return res.status(400).json({ message: "No available supply to process for submission!" });
         }
+        const dateNow = new Date()
 
         for (const history of supplyHistories) {
             const { material_no, material_desc, plant, uom, qty_pack, qty_uom, supply_by } = history;
@@ -109,8 +110,8 @@ export const createSupplyHistory = async (req, res) => {
                 supply_by: supply_by,
                 qty_pack: qty_pack,
                 qty_uom: qty_uom,
-                supply_date: new Date().toISOString().split("T")[0], // 'YYYY-MM-DD' for DATEONLY
-                supply_time: new Date().toTimeString().split(" ")[0], // 'HH:MM:SS' for TIME
+                supply_date: dateNow.toLocaleDateString('en-CA', { timeZone: 'Asia/Jakarta'}), // 'YYYY-MM-DD' for DATEONLY
+                supply_time: dateNow.toTimeString().split(" ")[0], // 'HH:MM:SS' for TIME
             });
 
             if (!supplyHistory) {
